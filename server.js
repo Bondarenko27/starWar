@@ -1,7 +1,7 @@
 //mongodb+srv://Bondarenko27:<password>@cluster0.euqup.mongodb.net/myFirstDatabase?retryWrites=true&w=majority
-const express = require('express');
-const bodyParser= require('body-parser');
-const app = express();
+const express = require('express')
+const bodyParser= require('body-parser')
+const app = express()
 const MongoClient = require('mongodb').MongoClient
 MongoClient.connect('mongodb+srv://Bondarenko27:Programer$21@cluster0.euqup.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
 {useUnifiedTopology: true}).then(client => {
@@ -9,24 +9,60 @@ MongoClient.connect('mongodb+srv://Bondarenko27:Programer$21@cluster0.euqup.mong
     const db = client.db('star-wars-quotes')
     const quotesCollection = db.collection('quotes')
     app.use(bodyParser.urlencoded({ extended: true }))
+
     app.set('view engine', 'ejs')
+
+    app.use(express.static('public'))
+
+    app.use(bodyParser.json())
+   
     app.get('/', (req, res) => {
         db.collection('quotes').find().toArray()
-        .then(results => {
-          console.log(results)})
-        res.sendFile(__dirname + '/index.html')})
-    app.post('/quotes', (req, res) => {
-            quotesCollection.insertOne(req.body)
+          .then(results => {
+            res.sendFile(__dirname + '/index.html'),
+            res.render('index.ejs', { quotes: results })
+            
+          })
+          .catch(/* ... */)
+      })
+
+      app.post('/quotes', (req, res) => {
+        quotesCollection.insertOne(req.body)
+          .then(result => {
+            res.redirect('/')
+          })
+        })
+
+        app.put('/quotes', (req, res) => {
+            quotesCollection.findOneAndUpdateOne({ name: req.body.name })
               .then(result => {
-                res.redirect('/')
+                 res.json('Success')
+               })
+              .catch(error => console.error(error))
+          })
+          app.delete('/quotes', (req, res) => {
+            quotesCollection.deleteOne(
+                { name: req.body.name }
+              ).then(result => {
+                if (result.deletedCount === 0) {
+                  return res.json('No quote to delete')
+                }
+                res.json(`Deleted Darth Vadar's quote`)
               })
-            })
+              .catch(error => console.error(error))
+          })
+     
+
+    
     app.listen(3000, function() {
         console.log('listening on 3000')
       })
   })
   .catch(error => console.error(error))
-  
+   
+ 
+
+ 
 
 
   
