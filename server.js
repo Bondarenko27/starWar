@@ -34,12 +34,29 @@ MongoClient.connect('mongodb+srv://Bondarenko27:Programer$21@cluster0.euqup.mong
         })
 
         app.put('/quotes', (req, res) => {
-            quotesCollection.findOneAndUpdateOne({ name: req.body.name })
-              .then(result => {
-                 res.json('Success')
-               })
-              .catch(error => console.error(error))
-          })
+            quotesCollection.findOneAndUpdateOne(
+                { name: 'Yoda' },
+                {
+                  $set: {
+                    name: req.body.name,
+                    quote: req.body.quote
+                  }
+                },
+                {
+                  upsert: true
+                }
+              )
+                .then(result => {/* ... */})
+                .catch(error => console.error(error)).
+            
+                fetch({})
+                .then(res => {
+                  if (res.ok) return res.json()
+                })
+                .then(response => {
+                  window.location.reload(true)
+                })
+            })
           app.delete('/quotes', (req, res) => {
             quotesCollection.deleteOne(
                 { name: req.body.name }
